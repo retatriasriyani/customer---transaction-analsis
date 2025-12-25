@@ -80,6 +80,7 @@ Revenue contribution is uneven across product categories, with a small number of
 
 ---
 
+```
 ## 📁 Repository Structure
 sql-customer-analysis/
 │
@@ -90,13 +91,19 @@ sql-customer-analysis/
 │ └── charts/ -- Visualization outputs
 └── ppt/
 └── Customer_Analysis_Portfolio.pptx
+```
 
-sql-customer-analysis/
-│
-├── customer_analysis.sql -- SQL queries
-├── README.md -- Project documentation
-├── outputs/
-│ ├── tables/ -- Query result tables (CSV)
-│ └── charts/ -- Visualization outputs
-└── ppt/
-└── Customer_Analysis_Portfolio.pptx
+---
+
+## 🛠 Tools & Skills
+- SQL (CTE, Window Functions, Aggregation)
+- Customer Segmentation
+- Business & Data Analysis
+- Data-driven Decision Making
+
+---
+
+## 👤 Author
+**Reta Tri Asriani**  
+Background: Mathematics | Data & Financial Analysis  
+
