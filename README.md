@@ -1,101 +1,43 @@
-# SQL Portfolio: Customer Transactions Analysis
+# SQL Portfolio: Retail Sales Analysis 
 
-## Deskripsi
-Project ini bertujuan untuk menganalisis **perilaku pelanggan, kontribusi pendapatan, serta loyalitas pelanggan**
-berdasarkan data transaksi menggunakan SQL.
+## Business Context
+This project analyzes retail sales data to evaluate profitability, customer behavior, discount impact, regional performance, and sales trends in order to support data-driven business decisions.
 
-Analisis dilakukan untuk menjawab pertanyaan bisnis seperti:
-- Produk dan kategori apa yang paling menghasilkan pendapatan?
-- Bagaimana perilaku pelanggan dalam melakukan pembelian?
-- Apakah pelanggan berlangganan lebih loyal dibandingkan non-berlangganan?
-- Bagaimana dampak diskon terhadap pembelian pelanggan?
+## Dataset Overview
+The dataset contains transaction-level retail data including product, category, customer, region, sales, profit, discount, and order date.
+Order date is stored in DD/MM/YYYY format and was processed using string-based date handling for time series analysis in SQLite.
 
-Project ini dibuat sebagai bagian dari **portfolio SQL** untuk menunjukkan kemampuan analisis data
-menggunakan query SQL dasar hingga menengah.
+## Use Case 1–6
 
----
+### 1. Product Profitability Analysis  
+**Insight:** Several products generate high sales volume but contribute negative profit.  
+**Conclusion:** These products may require pricing, cost, or discount strategy evaluation.
 
-## About the Data
-Dataset terdiri dari satu tabel transaksi pelanggan:
+### 2. Category & Sub-Category Performance  
+**Insight:** Profitability varies significantly across categories and sub-categories despite similar sales levels.  
+**Conclusion:** Business focus should prioritize categories with healthy profit margins rather than sales volume alone.
 
-**Table Name:** `customer_transactions_final`
+### 3. Discount Impact on Profit  
+**Insight:** Higher discount levels are associated with declining profit margins.  
+**Conclusion:** Excessive discounting reduces overall profitability and should be carefully controlled.
 
-Kolom utama:
-- `customer_id` : ID unik pelanggan  
-- `age`, `age_group` : usia dan kelompok usia pelanggan  
-- `gender` : jenis kelamin  
-- `item_purchased` : produk yang dibeli  
-- `category` : kategori produk  
-- `purchase_amount` : nilai transaksi  
-- `season` : musim pembelian  
-- `review_rating` : rating pelanggan  
-- `subscription_status` : status berlangganan  
-- `discount_applied` : status diskon  
-- `previous_purchases` : jumlah pembelian sebelumnya  
-- `payment_method` : metode pembayaran  
-- `frequency_of_purchases_days` : jarak hari antar pembelian  
+### 4. Customer Segmentation  
+**Insight:** A small segment of customers contributes disproportionately to total sales.  
+**Conclusion:** Retention and loyalty programs should focus on high-value customers.
 
----
+### 5. Regional Performance Analysis  
+**Insight:** Certain regions outperform others in terms of profit despite similar sales levels.  
+**Conclusion:** Regional performance differences indicate potential operational or pricing inefficiencies.
 
-## Use Case & Analysis Scope
+### 6. Time Series Sales Trend Analysis  
+**Insight:** Monthly sales show fluctuations with alternating upward and downward trends, indicating seasonality.  
+**Conclusion:** Promotional and inventory strategies should align with monthly sales patterns.
 
-### 1. Customer Behavior Analysis
-Menganalisis pola perilaku pelanggan berdasarkan:
-- Frekuensi pembelian
-- Riwayat pembelian sebelumnya
-- Segmentasi usia dan gender
-- Kepuasan pelanggan (review rating)
-- Identifikasi pelanggan berisiko churn
+## Key Findings
+- High sales do not always translate into high profit.
+- Discount strategy has a strong impact on profitability.
+- Customer and regional contributions are uneven.
+- Sales performance fluctuates over time, indicating seasonal behavior.
 
----
-
-### 2. Revenue Contribution Analysis
-Menganalisis kontribusi pendapatan dari:
-- Total transaksi dan total revenue
-- Kategori produk dan item terlaris
-- Pendapatan berdasarkan season
-- Pelanggan dengan nilai transaksi tertinggi
-
----
-
-### 3. Subscription & Loyalty Analysis
-Menganalisis loyalitas pelanggan melalui:
-- Perbandingan nilai pembelian pelanggan berlangganan vs non-berlangganan
-- Segmentasi pelanggan berdasarkan `age_group` dan `subscription_status`
-- Indikator loyalitas seperti:
-  - Repeat purchase (`previous_purchases`)
-  - Frekuensi pembelian (`frequency_of_purchases_days`)
-  - Customer Lifetime Value (CLV) sederhana
-- Identifikasi pelanggan bernilai tinggi namun berpotensi churn
-
----
-
-### 4. Marketing Strategy Insights
-Menyediakan insight untuk mendukung strategi marketing, antara lain:
-- Dampak diskon terhadap nilai dan frekuensi pembelian
-- Kategori produk unggulan di setiap season
-- Preferensi metode pembayaran berdasarkan kelompok usia
-- Identifikasi segmen pelanggan prioritas untuk promosi
-
----
-
-## Key Insights (Ringkasan)
-- Pelanggan berlangganan cenderung memiliki nilai pembelian lebih tinggi
-- Diskon meningkatkan frekuensi pembelian, namun tidak selalu meningkatkan nilai transaksi
-- Beberapa pelanggan bernilai tinggi memiliki tingkat kepuasan di bawah rata-rata
-- Setiap season memiliki kategori produk unggulan yang berbeda
-
----
-
-## Tools & Skills
-- SQL (Aggregation, CTE, Window Function)
-- Customer Segmentation
-- Loyalty & Revenue Analysis
-- Business Insight Generation
-
----
-
-## Notes
-Project ini berfokus pada eksplorasi dan analisis data menggunakan SQL.
-Hasil query dapat dikembangkan lebih lanjut menjadi dashboard atau analisis lanjutan
-menggunakan tools visualisasi.
+## Business Recommendation
+The company should optimize discount strategies, focus on high-value customers, and align regional and promotional decisions with observed sales trends to improve overall profitability.
