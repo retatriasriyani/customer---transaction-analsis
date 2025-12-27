@@ -1,173 +1,171 @@
-/* =====================================================
-   CUSTOMER TRANSACTION ANALYSIS
-   Dataset: customer_transactions_final
-   Author: Reta Tri Asriani
-   ===================================================== */
-
-/* =========================
-   		DATA OVERVIEW
-   ========================= */
--- Skala data & revenue
-SELECT 
-	count(*) AS jumlah_transaksi,
-	sum(purchase_amount) AS total_revenue,
-	round(avg(purchase_amount), 2) AS AVG_revenue
-FROM 
-	customer_transactions_final
-
-/* ======================================
-   		PRODUCT & SEASON PERFORMANCE
-   ====================================== */
--- Top kategori berdasarkan revenue
+--Product Profitability Analysis
 SELECT
-	category,
-	sum(purchase_amount) AS total_pembelian
-FROM 
-	customer_transactions_final
-GROUP BY 
-	category
-ORDER BY 
-	total_pembelian DESC;
-
--- Kategori terlaris per season
-WITH ranked AS (
-    SELECT 
-        season,
-        category,
-        SUM(purchase_amount) AS total_sales,
-		rank () OVER (PARTITION BY season ORDER BY SUM (purchase_amount) DESC) AS rank_season
-    FROM customer_transactions_final
-    GROUP BY season, category
-)
-SELECT season, category, total_sales
-FROM ranked
-WHERE rank_season = 1;
---------------------------atau------------------------------
-WITH ranked AS (
-    SELECT 
-        season,
-        category,
-        SUM(purchase_amount) AS total_sales,
-		ROW_NUMBER() OVER (PARTITION BY season ORDER BY SUM(purchase_amount) DESC) AS rn
-    FROM customer_transactions_final
-    GROUP BY season, category
-)
-SELECT 
-	season, 
-	category, 
-	total_sales
-FROM ranked
-WHERE rn = 1;
-
-/* =========================================
-   		CUSTOMER VALUE & SEGMENTATION
-   ========================================= */
--- Subscription vs non-subscription performance
-SELECT
-	subscription_status,
-	sum(purchase_amount) AS total_revenue,
-	count(*) AS total_transaksi,
-	round(avg(purchase_amount),2) AS AVG_total_pembelian
-FROM 
-	customer_transactions_final
-GROUP BY
-	subscription_status
-
- -- Formal customer value segmentation (High/Mid/Low
- WITH customer_value AS (
-    SELECT
-        customer_id,
-        sum(purchase_amount) AS total_revenue
-    FROM 
-		customer_transactions_final
-    GROUP BY 
-		customer_id
-),
-segmented AS (
-    SELECT
-        customer_id,
-        total_revenue,
-        ntile(3) OVER (ORDER BY total_revenue DESC) AS segment
-    FROM customer_value
-)
-SELECT
-    customer_id,
-    total_revenue,
-    CASE segment
-        WHEN 1 THEN 'High Value'
-        WHEN 2 THEN 'Mid Value'
-        ELSE 'Low Value'
-    END AS customer_segment
-FROM segmented;
-
--- Frequency-based segmentation (proxy repeat behavior)
-SELECT
-    customer_id,
-    count(*) AS total_transaksi,
-    CASE
-        WHEN count(*) >= 5 THEN 'Frequent Buyer'
-        WHEN count(*) >= 2 THEN 'Occasional Buyer'
-        ELSE 'One-time Buyer'
-    END AS frequency_segment
-FROM 
-	customer_transactions_final
-GROUP BY 
-	customer_id;
-
-/* ======================================
-   		DISCOUNT EFFECTIVENESS
-   ====================================== */
--- Dampak diskon terhadap nilai transaksi & volume
-SELECT
-	discount_applied,
-	avg(purchase_amount) AS AVG_purchase,
-	count(*) AS total_kastemer,
-	round(avg(purchase_amount),2) AS AVG_pembelian
+	product_name,
+	sum (sales) AS total_sales,
+	sum (profit) AS total_profit,
+	round(sum (profit) / sum (sales), 3) AS profit_margin
 FROM
-	customer_transactions_final
+	superstore_dataset
 GROUP BY
-	discount_applied;
-	
--- Diskon vs repeat purchase (behavioral impact)
-SELECT
-	discount_applied,
-	round(avg(previous_purchases), 2) AS avg_preview
-FROM
-	customer_transactions_final
-GROUP BY
-	discount_applied;
-	
--- ADVANCED INSIGHT
--- High value but low satisfaction customers
-WITH avg_rating_global AS (
-    SELECT 
-        AVG(review_rating) AS avg_rating
-    FROM 
-        customer_transactions_final
-),
-customer_summary AS (
-    SELECT
-        customer_id,
-        SUM(purchase_amount) AS total_revenue,
-        AVG(review_rating) AS customer_avg_rating
-    FROM 
-        customer_transactions_final
-    GROUP BY 
-        customer_id
-)
-SELECT
-    customer_id,
-    total_revenue,
-    ROUND(customer_avg_rating, 2) AS customer_avg_rating,
-    ROUND(avg_rating, 2) AS global_avg_rating
-FROM 
-    customer_summary
-CROSS JOIN 
-    avg_rating_global
-WHERE 
-    customer_avg_rating < avg_rating
-ORDER BY 
-    total_revenue DESC
+		product_name
+HAVING
+	sum (profit) < 0
+ORDER BY
+	total_sales DESC
 LIMIT 5;
 
+--Category & Sub-category Performance
+SELECT
+	category,
+	subcategory,
+	sum (sales) AS total_sales,
+	sum (profit) AS total_profit,
+	round (sum (profit) * 100.0 / sum (sales), 3) AS profit_margin
+FROM
+	superstore_dataset
+GROUP BY
+	category,
+	subcategory
+ORDER BY
+	total_sales DESC
+
+--Discount Impact on Profit
+WITH base AS (
+	SELECT
+		CAST(replace (discount,',', '.') AS REAL) AS discount_value,
+		sales, 
+		profit
+	FROM
+		superstore_dataset
+),
+discount_binning AS (
+	SELECT
+		CASE
+			WHEN discount_value = 0 THEN 'No discount'
+			WHEN discount_value > 0 AND discount_value <= 0.2 THEN 'Low discound'
+			WHEN discount_value > 0.2 AND discount_value <= 0.5 THEN 'Medium discount'
+			WHEN discount_value > 0.5 THEN 'High discount'
+			ELSE 'Unknown' 
+		END AS category_discount,
+		sales,
+		profit
+	FROM 
+		base
+)
+SELECT
+	category_discount,
+	sum (sales) AS total_sales,
+	sum (profit) AS total_profit,
+	round(sum (profit) *100.0 / sum(sales), 3) AS profit_margin
+FROM
+	discount_binning
+GROUP BY
+	category_discount
+ORDER BY
+	category_discount
+	
+--Customer Segmentantation
+WITH customer_summary AS (
+	SELECT
+		customer,
+		sum(sales) AS total_sales,
+		count (order_id) AS frequency_order
+	FROM
+		superstore_dataset
+	GROUP BY
+		customer
+),
+average_frequency AS (
+	SELECT
+		avg(frequency_order) AS AVG_frequency_order
+	FROM
+		customer_summary
+),
+customer_segmentation AS (
+	SELECT
+		cs.customer,
+		cs.total_sales,
+		cs.frequency_order,
+		CASE
+			WHEN cs.frequency_order < af.AVG_frequency_order THEN 'Low value'
+			WHEN cs.frequency_order BETWEEN af.AVG_frequency_order AND af.AVG_frequency_order * 1.5  THEN 'Medium value'
+			WHEN cs.frequency_order > af.AVG_frequency_order * 1.5 THEN 'High value'
+			ELSE 'Unknown' 
+		END AS customer_segment
+	FROM customer_summary cs
+	CROSS JOIN average_frequency af
+)
+SELECT
+	*
+FROM
+	customer_segmentation
+ORDER BY
+	total_sales DESC
+LIMIT 10;
+
+ --Regional Performance Analysis
+WITH region_summary AS (
+	SELECT
+		region, country, state, city,
+		sum (sales) AS total_sales,
+		sum (profit) AS total_profit
+	FROM
+		superstore_dataset
+	GROUP BY
+		region, country, state, city
+),
+best_region AS (
+	SELECT
+		*,
+		row_number () OVER(PARTITION BY region ORDER BY total_profit DESC) AS rn
+	FROM
+		region_summary
+) 
+SELECT
+	region, country, state, city,
+	total_sales,
+	total_profit,
+	round(total_profit / nullif(total_sales, 0), 3) AS profit_margin
+FROM
+	best_region
+WHERE rn = 1
+ORDER BY
+	total_sales DESC
+
+--Time Series Sales Trend Analysis
+WITH sales_month AS (
+SELECT
+	substr (order_date, 7, 4) || '-' || substr (order_date, 4, 2) AS month,
+	sum (sales) AS total_sales,
+	sum (profit) AS total_profit
+FROM
+	superstore_dataset
+WHERE 
+	substr(order_date, 7, 4) = '2022'
+GROUP BY
+	month
+),
+sales_previous AS (
+	SELECT
+		*,
+		lag(total_sales) OVER (ORDER BY month) AS previous_sales
+	FROM 
+		sales_month
+		)
+SELECT
+	month,
+	total_sales,
+	total_profit,
+	round((total_sales - previous_sales )* 100.0 / 
+	nullif(previous_sales, 0), 3) AS sales_growth,
+	CASE
+		WHEN previous_sales is NULL THEN 'first Trend'
+		WHEN total_sales < previous_sales THEN 'Downward Trend'
+		WHEN total_sales > previous_sales THEN 'Upward Trend'
+		ELSE 'Stable'
+	END AS trend_segment	
+FROM
+	sales_previous
+ORDER BY
+	month
 
