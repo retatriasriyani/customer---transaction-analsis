@@ -1,0 +1,74 @@
+# SQL Commentary – Superstore Data Analysis
+
+Dokumen ini menjelaskan pendekatan analitis dan teknik SQL yang digunakan pada setiap use case.
+
+---
+
+## Use Case 1 – Product Profitability
+Query ini melakukan agregasi total sales dan total profit per produk menggunakan `GROUP BY`.
+Filter `HAVING SUM(profit) < 0` digunakan untuk mengidentifikasi produk dengan profit negatif meskipun memiliki penjualan tinggi.
+
+**SQL Techniques:**
+- SUM()
+- GROUP BY
+- HAVING
+- ORDER BY
+- LIMIT
+
+---
+
+## Use Case 2 – Category & Sub-Category Performance
+Analisis dilakukan dengan agregasi multi-level pada category dan sub-category.
+Profit margin dihitung sebagai calculated column untuk membandingkan efisiensi antar kategori.
+
+**SQL Techniques:**
+- Multi-column GROUP BY
+- Calculated field
+- Aggregation
+
+---
+
+## Use Case 3 – Discount Impact Analysis
+Kolom discount dibersihkan dan dikonversi ke numerik menggunakan `CAST` dan `REPLACE`.
+Nilai diskon kemudian dikelompokkan (binning) menggunakan `CASE WHEN`.
+
+**SQL Techniques:**
+- Data cleaning
+- CASE WHEN
+- CTE
+- Aggregation
+
+---
+
+## Use Case 4 – Customer Segmentation
+Query ini membangun ringkasan customer menggunakan total sales dan frekuensi order.
+Nilai rata-rata frekuensi pembelian digabungkan menggunakan `CROSS JOIN` untuk keperluan segmentasi.
+
+**SQL Techniques:**
+- CTE
+- SUM(), COUNT(), AVG()
+- CROSS JOIN
+- CASE WHEN
+
+---
+
+## Use Case 5 – Regional Performance
+Data regional diagregasi hingga level city.
+Window function `ROW_NUMBER()` digunakan untuk menentukan city dengan profit tertinggi di setiap region.
+
+**SQL Techniques:**
+- CTE
+- Aggregation
+- Window function (ROW_NUMBER)
+
+---
+
+## Use Case 6 – Sales Trend Analysis
+Kolom tanggal berformat `DD/MM/YYYY` diproses menggunakan fungsi string SQL untuk analisis bulanan.
+Window function `LAG()` digunakan untuk menghitung perubahan penjualan antar periode.
+
+**SQL Techniques:**
+- Date parsing (SUBSTR)
+- CTE
+- LAG()
+- Calculated growth metric
