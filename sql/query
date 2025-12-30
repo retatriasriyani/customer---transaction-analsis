@@ -102,33 +102,28 @@ ORDER BY
 	total_sales DESC;
 
  --Regional Performance Analysis
-WITH region_summary AS (
+WITH region_profit AS (
 	SELECT
-		region, country, state, city,
-		sum (sales) AS total_sales,
+		region, city,
 		sum (profit) AS total_profit
 	FROM
 		superstore_dataset
 	GROUP BY
-		region, country, state, city
+		region, city
 ),
-best_region AS (
+rank_region AS (
 	SELECT
 		*,
-		row_number () OVER(PARTITION BY region ORDER BY total_profit DESC) AS rn
+		rank () OVER(PARTITION BY region ORDER BY total_profit DESC) AS rn
 	FROM
-		region_summary
+		region_profit
 ) 
 SELECT
-	region, country, state, city,
-	total_sales,
-	total_profit,
-	round(total_profit / nullif(total_sales, 0), 3) AS profit_margin
+	region, city,
+	total_profit
 FROM
-	best_region
+	rank_region
 WHERE rn = 1
-ORDER BY
-	total_sales DESC
 
 --Time Series Sales Trend Analysis
 WITH sales_month AS (
