@@ -1,4 +1,17 @@
---Product Profitability Analysis
+-- =============================================================================
+-- Analysis: Product Profitability
+-- Purpose:
+--   Identify products that generate sales but result in negative profit.
+--   This helps highlight items that might reduce overall profitability.
+--
+-- Notes:
+--   - Aggregate sales and profit by product_name.
+--   - Use HAVING to filter products with total profit < 0.
+--   - No arbitrary sales threshold is applied (exploratory).
+--
+-- Expected outcome:
+--   List of product names with negative profit and their sales totals.
+-- =============================================================================
 SELECT
 	product_name,
 	sum (sales) AS total_sales,
@@ -13,7 +26,20 @@ HAVING
 ORDER BY
 	total_sales DESC;
 
---Category & Sub-category Performance
+-- =============================================================================
+-- Analysis: Category and Sub-Category Performance
+-- Purpose:
+--   Compare sales, profit, and profit margin across product categories
+--   and sub-categories to identify performance differences.
+--
+-- Approach:
+--   - Aggregate sales and profit by category and sub-category.
+--   - Calculate profit margin as profit divided by sales.
+--   - Order results to observe high- and low-performing groups.
+--
+-- Insight focus:
+--   Differences in profitability are not always aligned with sales volume.
+-- =============================================================================
 SELECT
 	category,
 	subcategory,
@@ -28,7 +54,23 @@ GROUP BY
 ORDER BY
 	total_sales DESC
 
---Discount Impact on Profit
+
+-- =============================================================================
+-- Analysis: Discount Impact Analysis
+-- Purpose:
+--   Examine the relationship between discount levels and profitability.
+--
+-- Data preparation:
+--   - Clean discount values stored as TEXT.
+--   - Replace comma decimal separators with dots for numeric conversion.
+--
+-- Approach:
+--   - Group transactions into discount ranges (bins).
+--   - Compare average sales, profit, and profit margin across discount bins.
+--
+-- Insight focus:
+--   Higher discount levels tend to reduce profit margins.
+-- =============================================================================
 WITH base AS (
 	SELECT
 		CAST(replace (discount,',', '.') AS REAL) AS discount_value,
@@ -62,8 +104,21 @@ GROUP BY
 	category_discount
 ORDER BY
 	category_discount
-	
---Customer Segmentantation
+
+-- =============================================================================
+-- Analysis: Customer Segmentation
+-- Purpose:
+--   Segment customers based on purchasing behavior using transaction
+--   frequency and total sales contribution.
+--
+-- Approach:
+--   - Aggregate number of orders and total sales per customer.
+--   - Use average transaction metrics for simple segmentation.
+--
+-- Insight focus:
+--   Customers show varying purchasing patterns that contribute
+--   differently to overall sales.
+-- =============================================================================
 WITH customer_summary AS (
 	SELECT
 		customer,
@@ -101,7 +156,19 @@ FROM
 ORDER BY
 	total_sales DESC;
 
- --Regional Performance Analysis
+-- =============================================================================
+-- Analysis: Regional Performance Analysis
+-- Purpose:
+--   Evaluate sales and profit performance across regions and cities.
+--
+-- Approach:
+--   - Aggregate profit at the city and region level.
+--   - Apply window functions to rank cities within each region.
+--
+-- Insight focus:
+--   Regional and city-level performance varies, highlighting
+--   geographic differences in profitability.
+-- =============================================================================
 WITH region_profit AS (
 	SELECT
 		region, city,
@@ -125,7 +192,22 @@ FROM
 	rank_region
 WHERE rn = 1
 
---Time Series Sales Trend Analysis
+-- =============================================================================
+-- Analysis: Sales Trend Analysis
+-- Purpose:
+--   Analyze monthly sales trends over time.
+--
+-- Data preparation:
+--   - Parse order dates stored in DD/MM/YYYY text format.
+--   - Convert date components using SQL string functions.
+--
+-- Approach:
+--   - Aggregate sales by month and year.
+--   - Observe changes and patterns over time.
+--
+-- Insight focus:
+--   Transaction data reveals recurring monthly sales patterns.
+-- =============================================================================
 WITH sales_month AS (
 SELECT
 	substr (order_date, 7, 4) || '-' || substr (order_date, 4, 2) AS month,
